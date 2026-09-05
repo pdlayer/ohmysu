@@ -686,8 +686,8 @@ jobs:
             gh release edit ci --repo "$GITHUB_REPOSITORY"               --notes "Auto-built from \`main\` @ $GITHUB_SHA"
           fi
           gh release upload ci apks/*.apk --clobber
-          git tag -f ci "$GITHUB_SHA"
-          git push -f origin ci
+          # move the 'ci' tag to the freshly built commit (API: no checkout needed)
+          gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs"               -f ref=refs/tags/ci -f sha="$GITHUB_SHA" 2>/dev/null ||             gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/ci"               -f sha="$GITHUB_SHA"
 
   # ------------------------------------------------------------
   # Telegram upload (combined)
