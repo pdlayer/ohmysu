@@ -34,6 +34,9 @@ on:
 
   workflow_call:
 
+permissions:
+  contents: write
+
 jobs:
 
   generate-key:
@@ -651,6 +654,40 @@ jobs:
           path: dist/*.apk
 
 
+
+  # ------------------------------------------------------------
+  # Rolling pre-release (main pushes)
+  # ------------------------------------------------------------
+
+  rolling-release:
+    needs: repack-manager
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+        needs.repack-manager.result == 'success'
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Download manager artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*Manager"
+          path: apks
+          merge-multiple: true
+
+      - name: Publish rolling pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view ci --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create ci --repo "$GITHUB_REPOSITORY"               --title "OhMySU CI (latest)" --prerelease               --target "$GITHUB_SHA"               --notes "Auto-built from \`main\` @ $GITHUB_SHA"
+          else
+            gh release edit ci --repo "$GITHUB_REPOSITORY"               --notes "Auto-built from \`main\` @ $GITHUB_SHA"
+          fi
+          gh release upload ci apks/*.apk --clobber
+          git tag -f ci "$GITHUB_SHA"
+          git push -f origin ci
 
   # ------------------------------------------------------------
   # Telegram upload (combined)
