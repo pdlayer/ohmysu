@@ -1041,7 +1041,7 @@ pub fn is_zygisk_provider(module_id: &str) -> bool {
     let id_lower = module_id.to_ascii_lowercase();
     matches!(
         id_lower.as_str(),
-        "zygisksu" | "rezygisk" | "nyazygisk" | "neozygisk"
+        "zygisksu" | "rezygisk" | "nyazygisk" | "neozygisk" | "ohmyzygisk"
     )
 }
 
