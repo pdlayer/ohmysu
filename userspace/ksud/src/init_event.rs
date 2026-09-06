@@ -53,36 +53,6 @@ pub fn on_post_data_fs() -> Result<()> {
         }
     }
 
-    // OhMySU: bootloader state spoof.
-    // GKI passes androidboot.* via bootconfig (not the kernel cmdline), so
-    // first-stage init already imported the real (unlocked) values by now.
-    // Rewrite them before zygote starts — every app sees a locked device.
-    // Opt out: touch /data/adb/ksu/bl_spoof_off
-    if !Path::new("/data/adb/ksu/bl_spoof_off").exists() {
-        let rp = ResetProp {
-            skip_svc: true,
-            persistent: false,
-            persist_only: false,
-            verbose: false,
-            show_context: false,
-            rebuild: false,
-        };
-        for (key, value) in [
-            ("ro.boot.verifiedbootstate", "green"),
-            ("ro.boot.vbmeta.device_state", "locked"),
-            ("ro.boot.flash.locked", "1"),
-            ("ro.boot.oem_unlock_allowed", "0"),
-            ("sys.oem_unlock_allowed", "0"),
-            ("ro.boot.warranty_bit", "0"),
-            ("ro.warranty_bit", "0"),
-        ] {
-            if let Err(e) = rp.set(key, value) {
-                warn!("bl spoof: failed to set {key}: {e}");
-            }
-        }
-        info!("bootloader state spoofed at prop level");
-    }
-
     let module_dir = defs::MODULE_DIR;
 
     assets::ensure_binaries(true).with_context(|| "Failed to extract bin assets")?;
