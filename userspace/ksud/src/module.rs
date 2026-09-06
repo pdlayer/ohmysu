@@ -1081,7 +1081,10 @@ pub fn is_zygisk_daemon_running(module_id: &str) -> bool {
             name.starts_with("rezygisk") || name.contains("rezygisk")
         }),
         "ohmyzygisk" => is_process_running_matching(|name| {
-            name.starts_with("ohmyd") || name.starts_with("ohmy-ptrace") || name.contains("ohmy")
+            name.starts_with("ohmyd")
+                || name.starts_with("ohmy-ptrace")
+                || name.contains("ohmy")
+                || name.contains("zygisk") // compat: pre-rename module still running
         }),
         "zygisksu" => is_process_running_matching(|name| {
             name.starts_with("zygiskd")
