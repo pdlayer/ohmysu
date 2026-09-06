@@ -685,7 +685,7 @@ jobs:
           else
             gh release edit ci --repo "$GITHUB_REPOSITORY"               --notes "Auto-built from \`main\` @ $GITHUB_SHA"
           fi
-          gh release upload ci apks/*.apk --clobber
+          gh release upload ci apks/*.apk --clobber --repo "$GITHUB_REPOSITORY"
           # move the 'ci' tag to the freshly built commit (API: no checkout needed)
           gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs"               -f ref=refs/tags/ci -f sha="$GITHUB_SHA" 2>/dev/null ||             gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/ci"               -f sha="$GITHUB_SHA"
 
